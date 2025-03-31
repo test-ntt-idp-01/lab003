@@ -21,7 +21,7 @@ jobs:
         with:
           # Repository name with owner. For example, actions/checkout
           # Default: ${{ github.repository }}
-          repository: 'lab-02'
+          repository: 'test-ntt-idp-01/lab-02'
           ref: 'main'
           path: 'tf-modules'
       - uses: EndBug/add-and-commit@v9 # You can change this to use a specific version.
