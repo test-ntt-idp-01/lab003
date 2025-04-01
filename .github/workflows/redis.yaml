@@ -1,0 +1,148 @@
+name: Deploy Dev Infra - Redis
+on:
+  workflow_dispatch:
+    inputs:
+      rsgr_name:
+        description: "Grupo de recursos"
+        required: true
+        default: "rg-pe-ntt-idp-port-01"
+        type: string
+      location:
+        description: "Azure location"
+        required: true
+        default: "eastus2"
+        type: string
+      seq_number:
+        description: "Numero secuencial correlativo del recurso"
+        required: true
+        default: "001"
+        type: string
+      redis_version:
+        description: "Versión de Redis"
+        required: true
+        default: "6"
+        type: string
+      scope:
+        description: "Scope de ambiente"
+        required: true
+        default: "NTT"
+        type: string
+      env:
+        description: "Entorno"
+        required: true
+        default: "dev"
+        type: string
+      codproy:
+        description: "Codigo Requerimiento"
+        required: true
+        default: "AEIO-1919 - Mejora experiencia cliente"
+        type: string
+      owner:
+        description: "Propietario"
+        required: true
+        default: "AEIO"
+        type: string
+      criticidad:
+        description: "Criticidad"
+        required: true
+        default: "Alto"
+        type: string
+      # enable_autodestroy:
+      #   description: "Flag para activar la auto-destrucción"
+      #   required: false
+      #   default: false
+      #   type: boolean
+      expire_time:
+        description: "Tiempo para la auto eliminación (horas)"
+        required: false
+        default: "1"
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: terraform-deploy
+  cancel-in-progress: false
+
+jobs:
+  Deployment:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: terraform-azure-redis/v${{ inputs.redis_version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3.1.0
+
+      - name: 'Az CLI login'
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          enable-AzPSSession: true
+
+      - name: 'Install Terraform'
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: latest
+
+      - name: 'Create terraform.tfvars'
+        run: |
+          echo "rsgr_name=\"${{ github.event.inputs.rsgr_name }}\"" >> terraform.tfvars
+          echo "location=\"${{ github.event.inputs.location }}\"" >> terraform.tfvars
+          echo "seq_number=\"${{ github.event.inputs.seq_number }}\"" >> terraform.tfvars
+          echo "infr-env = {" >> terraform.tfvars
+          echo "  scope =\"${{ github.event.inputs.scope }}\"" >> terraform.tfvars
+          echo "  env   =\"${{ github.event.inputs.env }}\"" >> terraform.tfvars
+          echo "}" >> terraform.tfvars
+          echo "audit = {" >> terraform.tfvars
+          echo "  codproy =\"${{ github.event.inputs.codproy }}\"" >> terraform.tfvars
+          echo "  owner   =\"${{ github.event.inputs.owner }}\"" >> terraform.tfvars
+          echo "  criticidad =\"${{ github.event.inputs.criticidad }}\"" >> terraform.tfvars
+          echo "}" >> terraform.tfvars
+          echo "destroy_after=\"${{ github.event.inputs.expire_time }}\"" >> terraform.tfvars
+          echo "enable_autodestroy=false" >> terraform.tfvars
+
+      - name: Initialize Terraform
+        run: terraform init
+
+      - name: Validate Terraform Configuration
+        run: terraform validate
+
+      - name: Plan Terraform Deployment
+        run: terraform plan -out=tfplan -var-file="terraform.tfvars"
+        continue-on-error: true
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+      - name: Plan Terraform Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+
+      - name: Apply Terraform Deployment
+        run: |
+          terraform apply -auto-approve tfplan
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+      - name: Rollback en caso de fallo
+        if: failure()
+        run: terraform destroy -auto-approve
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+      - name: Terraform Output
+        run: terraform output
+      
+      - name: Azure Logout
+        run: az logout
