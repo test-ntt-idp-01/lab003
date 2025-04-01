@@ -7,6 +7,63 @@ on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
     branches: [ "main" ]
+  workflow_dispatch:
+    inputs:
+      rsgr_name:
+        description: "Grupo de recursos"
+        required: true
+        default: "rg-pe-ntt-idp-port-01"
+        type: string
+      location:
+        description: "Azure location"
+        required: true
+        default: "eastus2"
+        type: string
+      seq_number:
+        description: "Numero secuencial correlativo del recurso"
+        required: true
+        default: "001"
+        type: string
+      redis_version:
+        description: "Versión de Redis"
+        required: true
+        default: "6"
+        type: string
+      scope:
+        description: "Scope de ambiente"
+        required: true
+        default: "NTT"
+        type: string
+      env:
+        description: "Entorno"
+        required: true
+        default: "dev"
+        type: string
+      codproy:
+        description: "Codigo Requerimiento"
+        required: true
+        default: "AEIO-1919 - Mejora experiencia cliente"
+        type: string
+      owner:
+        description: "Propietario"
+        required: true
+        default: "AEIO"
+        type: string
+      criticidad:
+        description: "Criticidad"
+        required: true
+        default: "Alto"
+        type: string
+      # enable_autodestroy:
+      #   description: "Flag para activar la auto-destrucción"
+      #   required: false
+      #   default: false
+      #   type: boolean
+      expire_time:
+        description: "Tiempo para la auto eliminación (horas)"
+        required: false
+        default: "1"
+        type: string
 jobs:
   # This workflow contains a single job called "build"
   build:
@@ -25,21 +82,9 @@ jobs:
           ref: 'main'
           path: 'tf-modules'
           token:  ${{ secrets.PAT }}
-      - run: echo -n "cat" > ./tf-modules/cat.md
+      - run: ./templates/redis/main.sh > ./tf-modules/$(date +"%s").md
       - uses: EndBug/add-and-commit@v9 # You can change this to use a specific version.
         with:
           new_branch: custom-new-branch
           cwd: './tf-modules'
 
-    # The branch, tag or SHA to checkout. When checking out the repository that
-    # triggered a workflow, this defaults to the reference or SHA for that event.
-    # Otherwi
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
-
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
