@@ -72,7 +72,6 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: terraform-azure-redis/v${{ inputs.redis_version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3.1.0
