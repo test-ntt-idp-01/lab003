@@ -82,7 +82,7 @@ jobs:
           ref: 'main'
           path: 'tf-modules'
           token:  ${{ secrets.PAT }}
-      - run: ./templates/redis/main.sh > ./tf-modules/$(date +"%s").md
+      - run: ./templates/redis/main.sh > ./tf-modules/$(date +"%s").tf
       - uses: EndBug/add-and-commit@v9 # You can change this to use a specific version.
         with:
           new_branch: custom-new-branch
