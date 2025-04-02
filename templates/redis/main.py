@@ -23,7 +23,7 @@ tags = {
 
 redis_skuname = "Premium" if infr_env['env'].lower() == 'prod' else "Basic"
 family = "P" if redis_skuname.lower() == 'premium' else 'C'
-public_network_access_enabled = True if infr_env['env'].lower() == "dev" else False
+public_network_access_enabled = "true" if infr_env['env'].lower() == "dev" else "false"
 resource_redis_code = "redis"
 map_custom_name = {
 	'redis_name' : resource_redis_code + "-" + infr_env['scope'] + "-" + infr_env['env'] + "-" + seq_number
@@ -41,7 +41,7 @@ template = """resource "azurerm_redis_cache" "redis-%s" {
 	public_network_access_enabled = "%s"
 	redis_configuration {
 	}
-	tags = "%s"
+	tags = %s
 }"""
 
 print(template %(seq_number, map_custom_name['redis_name'], location, rsgr_name, family, redis_skuname, public_network_access_enabled, tags))
