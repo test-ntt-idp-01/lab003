@@ -6,4 +6,5 @@ echo $PR_LINK
 PR_ID=$(echo "$PR_LINK" | tail -n1 | cut -d "/" -f7)
 echo $PR_ID
 # approving pr
-gh pr review --approve -R test-ntt-idp-01/lab003-dev  $PR_ID
+# gh pr review --approve -R test-ntt-idp-01/lab003-dev  $PR_ID
+gh pr merge -b "merged by github actions" --admin --auto -R test-ntt-idp-01/lab003-dev  $PR_ID 
