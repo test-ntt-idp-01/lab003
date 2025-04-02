@@ -13,13 +13,13 @@ audit = {
 }
 seq_number = os.environ['seq_number']
 
-tags = {
-    "CodigoProyecto"  : audit['codproy'],
-    "NombreOwner"      : audit['owner'],
-    "Criticidad"       : audit['criticidad'],
-    "Ambiente"         : infr_env['env'],
-    "NombreAplicacion" : infr_env['scope'],
-}
+tags = """{
+		CodigoProyecto  :  "%s",
+		NombreOwner     : "%s" ,
+		Criticidad      : "%s",
+		Ambiente        : "%s",
+		NombreAplicacion: "%s"
+	}""" % ( audit['codproy'], audit['owner'], audit['criticidad'], infr_env['env'], infr_env['scope'])
 
 redis_skuname = "Premium" if infr_env['env'].lower() == 'prod' else "Basic"
 family = "P" if redis_skuname.lower() == 'premium' else 'C'
