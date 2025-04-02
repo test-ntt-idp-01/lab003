@@ -36,7 +36,7 @@ template = """resource "azurerm_redis_cache" "redis-%s" {
 	capacity            = 1
 	family              = "%s"
 	sku_name            = "%s"
-	minimum_tls_version = "1.3"
+	minimum_tls_version = "1.2"
 	redis_version       = "4"
 	public_network_access_enabled = "%s"
 	redis_configuration {
