@@ -92,6 +92,9 @@ jobs:
           owner: ${{ github.event.inputs.owner }}
           criticidad: ${{ github.event.inputs.criticidad }}
           expire_time: ${{ github.event.inputs.expire_time }}
+      - run: ./templates/pr/main.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
       - uses: EndBug/add-and-commit@v9 # You can change this to use a specific version.
         with:
           new_branch: custom-new-branch
