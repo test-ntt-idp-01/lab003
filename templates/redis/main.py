@@ -12,7 +12,7 @@ audit = {
     'criticidad': os.environ['criticidad'],
 }
 seq_number = os.environ['seq_number']
-
+redis_version = os.environ['redis_version']
 tags = """{
 		CodigoProyecto  :  "%s",
 		NombreOwner     : "%s" ,
@@ -37,12 +37,12 @@ template = """resource "azurerm_redis_cache" "redis-%s" {
 	family              = "%s"
 	sku_name            = "%s"
 	minimum_tls_version = "1.2"
-	redis_version       = "4"
+	redis_version       = "%s"
 	public_network_access_enabled = "%s"
 	redis_configuration {
 	}
 	tags = %s
 }"""
 
-print(template %(seq_number, map_custom_name['redis_name'], location, rsgr_name, family, redis_skuname, public_network_access_enabled, tags))
+print(template %(seq_number, map_custom_name['redis_name'], location, rsgr_name, family, redis_skuname, redis_version, public_network_access_enabled, tags))
 
