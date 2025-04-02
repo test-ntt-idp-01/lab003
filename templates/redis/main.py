@@ -14,11 +14,11 @@ audit = {
 seq_number = os.environ['seq_number']
 
 tags = {
-    'CodigoProyecto'   : audit['codproy'],
-    'NombreOwner'      : audit['owner'],
-    'Criticidad'       : audit['criticidad'],
-    'Ambiente'         : infr_env['env'],
-    'NombreAplicacion' : infr_env['scope'],
+    "CodigoProyecto"  : audit['codproy'],
+    "NombreOwner"      : audit['owner'],
+    "Criticidad"       : audit['criticidad'],
+    "Ambiente"         : infr_env['env'],
+    "NombreAplicacion" : infr_env['scope'],
 }
 
 redis_skuname = "Premium" if infr_env['env'].lower() == 'prod' else "Basic"
