@@ -5,8 +5,6 @@ name: CI
 # Controls when the workflow will run
 on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
-  push:
-    branches: [ "main" ]
   workflow_dispatch:
     inputs:
       rsgr_name:
@@ -82,7 +80,18 @@ jobs:
           ref: 'main'
           path: 'tf-modules'
           token:  ${{ secrets.PAT }}
-      - run: ./templates/redis/main.sh > ./tf-modules/$(date +"%s").tf
+      - run: ./templates/redis/main.sh > ./tf-modules/redis-$(date +"%s").tf
+        env:
+          rsgr_name: ${{ github.event.inputs.rsgr_name }}
+          location: ${{ github.event.inputs.location }}
+          seq_number: ${{ github.event.inputs.seq_number }}
+          redis_version: ${{ github.event.inputs.redis_version }}
+          scope: ${{ github.event.inputs.scope }}
+          env: ${{ github.event.inputs.env }}
+          codproy: ${{ github.event.inputs.codproy }}
+          owner: ${{ github.event.inputs.owner }}
+          criticidad: ${{ github.event.inputs.criticidad }}
+          expire_time: ${{ github.event.inputs.expire_time }}
       - uses: EndBug/add-and-commit@v9 # You can change this to use a specific version.
         with:
           new_branch: custom-new-branch
