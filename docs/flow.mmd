@@ -1,20 +1,27 @@
 sequenceDiagram
   participant Desarrollador as Desarrollador
   participant IDP as IDP
+  participant GitHubOrquestator as GitHubOrquestator
+  participant GitHubPrincipal as GitHubPrincipal
   participant TerraformCloud as TerraformCloud
-  participant GitHub as GitHub
+  participant Jira as JiraTicketManager
   participant Azure as Azure
 
   Desarrollador ->> IDP: Solicitar las plantillas disponibles
   IDP -->> Desarrollador: Enviar lista de plantillas y valores necesarios
   Desarrollador ->> IDP: Elegir plantilla e ingresar valores
   IDP ->> IDP: Solicita aprobacion de ejecucion al LT
-  IDP ->> GitHub: Solicitar código base del repo principal
-  GitHub -->> IDP: Enviar código solicitado
-  IDP ->> GitHub: Solicitar creación de nueva rama
-  GitHub -->> IDP: Confirmación de creación de rama
-  IDP ->> GitHub: Subir código para desplegar componente(PR)
-  GitHub ->> GitHub: Aprobacion de PR
-  TerraformCloud ->> GitHub: Solicita actualizacion de codigo
-  GitHub -->> TerraformCloud: Envia actualizacion
-  TerraformCloud ->> Azure: Inicia Despliegue <br>
+  IDP ->> GitHubOrquestator: Ejecuta pipeline creacion componente <br>
+  GitHubOrquestator ->> GitHubPrincipal: Solicita latest de repo(clone)
+  GitHubPrincipal -->> GitHubOrquestator: Envia codigo
+  GitHubOrquestator ->> GitHubPrincipal: crea rama nueva <br>
+  GitHubOrquestator ->> GitHubOrquestator: Genera template
+  GitHubOrquestator ->> GitHubPrincipal: Envia template con nuevo codigo
+  GitHubOrquestator ->> GitHubPrincipal: Genera PR
+  GitHubPrincipal ->> Jira: Envia notificacion PR
+  Jira -->> GitHubPrincipal: Aprueba PR
+  GitHubPrincipal ->> TerraformCloud: lanza plan/apply <br>
+  TerraformCloud ->> TerraformCloud: Auto apply
+  TerraformCloud ->> Azure: Despliega componente
+
+
